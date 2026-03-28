@@ -193,46 +193,114 @@ async function loadUserBlacklist(userId) {
 
 async function save() {
   if (!formRef.value) return
-
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
 
   saving.value = true
+  const currentUsername = form.value.username
+  const currentPassword = form.value.password
+
   try {
+    const payload = { ...form.value }
+    
+    if (!payload.password) delete payload.password
+    
     if (isEdit.value) {
-      const payload = {
-        id: Number(form.value.id),
-        username: form.value.username.trim(),
-        password: form.value.password ? form.value.password.trim() : undefined,
-        isAgent: !!form.value.isAgent,
-        status: Number(form.value.status),
-        blacklistedProjects: form.value.blacklistedProjects || []
-      }
+      delete payload.initialBalance 
       const res = await updateAgentUser(payload)
-      if (res.code !== 200) {
-        throw new Error(res.message || '更新失败')
-      }
+      if (res.code !== 200) throw new Error(res.message)
     } else {
-      const payload = {
-        username: form.value.username.trim(),
-        password: form.value.password,
-        isAgent: !!form.value.isAgent,
-        blacklistedProjects: form.value.blacklistedProjects || []
-      }
       const res = await createAgentUser(payload)
-      if (res.code !== 200) {
-        throw new Error(res.message || '创建失败')
-      }
+      if (res.code !== 200) throw new Error(res.message)
     }
 
     ElMessage.success('保存成功')
     emit('update:modelValue', false)
     emit('updated')
-  } catch (error) {
-    console.error('保存下级失败:', error)
-    ElMessage.error(error.message || '操作失败')
+
+    if (currentPassword) {
+      saveLocalAndAlert(currentUsername, currentPassword)
+    }
+
+  } catch (e) {
+    console.error(e)
+    ElMessage.error(e.message || '操作失败')
   } finally {
     saving.value = false
+  }
+}
+
+function saveLocalAndAlert(username, password) {
+  localStorage.setItem('LAST_AGENT_SUB_CREDS', JSON.stringify({ username, password }));
+  const text = `账号：${username}\n密码：${password}`;
+  ElMessageBox.alert(
+    `
+    <div style="text-align: center;">
+       <p>下级用户已保存</p>
+       <div style="background: #f0f9eb; color: #67c23a; padding: 10px; margin: 10px 0; border-radius: 4px;">
+         <div>账号: <strong>${username}</strong></div>
+         <div>密码: <strong>${password}</strong></div>
+       </div>
+    </div>
+    `,
+    '操作成功',
+    {
+      dangerouslyUseHTMLString: true,
+      confirmButtonText: '复制并关闭',
+      callback: () => {
+        copyText(text)
+      }
+    }
+  );
+}
+
+function copyText(text) {
+  if (navigator?.clipboard?.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => ElMessage.success('已复制'))
+      .catch(() => fallbackCopyText(text))
+    return
+  }
+
+  fallbackCopyText(text)
+}
+
+function fallbackCopyText(text) {
+  try {
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.setAttribute('readonly', 'readonly')
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+    textarea.setSelectionRange(0, textarea.value.length)
+
+    const copied = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
+    if (copied) {
+      ElMessage.success('已复制')
+    } else {
+      ElMessage.warning('当前环境不支持自动复制，请手动复制')
+    }
+  } catch (e) {
+    console.error(e)
+    ElMessage.warning('当前环境不支持自动复制，请手动复制')
+  }
+}
+
+function pasteFromLocal() {
+  const cached = localStorage.getItem('LAST_AGENT_SUB_CREDS');
+  if (cached) {
+    try {
+      const { username, password } = JSON.parse(cached);
+      form.value.username = username;
+      form.value.password = password;
+      ElMessage.success('已粘贴上次信息');
+    } catch (e) { console.error(e) }
+  } else {
+    ElMessage.info('没有可粘贴的记录');
   }
 }
 
@@ -240,3 +308,10 @@ function onUpdate(val) {
   emit('update:modelValue', val)
 }
 </script>
+
+<style scoped>
+/* 按钮紧凑样式 */
+:deep(.el-table .cell) {
+  padding: 0 8px;
+}
+</style>

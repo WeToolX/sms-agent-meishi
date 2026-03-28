@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <div class="title">代理登录</div>
+      <div class="title">{{ brandName }}代理登录</div>
 
       <el-form :model="form" :rules="rules" ref="loginForm" label-position="top" class="login-form">
         <el-form-item label="账号" prop="username">
@@ -29,6 +29,7 @@ import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { agentLogin } from '@/api/agent'
 import { useAgentStore } from '@/store/agentStore'
+import { brandName } from '@/config/brand'
 
 const router = useRouter()
 const store = useAgentStore()

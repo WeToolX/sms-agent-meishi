@@ -5,6 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:brand": "node scripts/build-brand.js",
+    "build:huike": "node scripts/build-brand.js huike",
+    "build:dagui": "node scripts/build-brand.js dagui",
+    "build:meishi": "node scripts/build-brand.js meishi",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

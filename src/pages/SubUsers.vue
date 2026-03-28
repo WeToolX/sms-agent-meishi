@@ -7,16 +7,34 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 10px;">
+        <el-input 
+          v-model="searchUserName" 
+          placeholder="根据用户名模糊查询" 
+          clearable 
+          size="small" 
+          style="width: 160px" 
+          @keyup.enter="handleSearch" 
+        />
         <el-input
-          v-model="searchUserName"
-          placeholder="根据用户名模糊查询"
+          v-model="searchTemplateId"
+          placeholder="价格模板ID"
           clearable
           size="small"
-          style="width: 160px"
-          @keyup.enter="getUserList"
+          style="width: 140px"
+          @keyup.enter="handleSearch"
         />
-        <el-button type="primary" size="small" @click="getUserList">查询</el-button>
-        <el-button type="success" size="small" @click="() => { searchUserName = ''; getUserList(); }">刷新</el-button>
+        <el-button type="primary" size="small" @click="handleSearch">查询</el-button>
+        <el-button type="success" size="small" @click="handleResetSearch">刷新</el-button>
+        
+        <!-- <el-button 
+          type="danger" 
+          size="small" 
+          :disabled="selectedIds.length === 0" 
+          @click="handleBatchDelete"
+        >
+          批量删除
+        </el-button> -->
+        
         <el-button type="primary" size="small" @click="openEditDialog()">新增下级</el-button>
       </div>
     </div>
@@ -94,6 +112,7 @@ import { listAgentUsers } from '@/api/agent'
 
 const router = useRouter()
 const searchUserName = ref('')
+const searchTemplateId = ref('')
 const loading = ref(false)
 const tableData = ref([])
 const page = ref(1)
@@ -111,10 +130,15 @@ function goBack() {
 async function getUserList() {
   loading.value = true
   try {
+    const normalizedUserName = searchUserName.value.trim()
+    const normalizedTemplateId = String(searchTemplateId.value ?? '').trim()
     const params = {
       page: page.value,
       size: pageSize.value,
-      userName: searchUserName.value.trim() || ''
+      userName: normalizedUserName || ''
+    }
+    if (normalizedTemplateId) {
+      params.templateId = normalizedTemplateId
     }
     const res = await listAgentUsers(params)
 
@@ -127,6 +151,58 @@ async function getUserList() {
   } catch (error) {
     ElMessage.error('加载数据失败，请检查网络')
     console.error('请求失败', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleSearch() {
+  if (page.value !== 1) {
+    page.value = 1
+    return
+  }
+  getUserList()
+}
+
+function handleResetSearch() {
+  searchUserName.value = ''
+  searchTemplateId.value = ''
+  handleSearch()
+}
+
+function handleSelectionChange(selection) {
+  selectedIds.value = selection.map(item => item.id)
+}
+// eslint-disable-next-line no-unused-vars
+async function handleBatchDelete() {
+  if (selectedIds.value.length === 0) return
+
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除选中的 ${selectedIds.value.length} 个用户吗？此操作不可恢复，且会删除关联的项目配置。`,
+      '警告',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    loading.value = true
+    const res = await deleteAgentUsers(selectedIds.value)
+    
+    if (res.code === 200) {
+      ElMessage.success('删除成功')
+      selectedIds.value = []
+      getUserList()
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error(error)
+      ElMessage.error('操作失败')
+    }
   } finally {
     loading.value = false
   }
@@ -194,3 +270,4 @@ function openQuotaDialog(row) {
   margin-top: 20px;
 }
 </style>
+

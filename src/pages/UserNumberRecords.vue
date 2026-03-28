@@ -77,10 +77,10 @@
     <!-- 数据表格 -->
     <el-card class="table-card" shadow="hover">
       <el-table :data="records" border stripe v-loading="loading" style="width: 100%">
-        <el-table-column prop="projectId" label="项目ID" width="100" align="center" />
-        <el-table-column prop="userName" label="用户名" width="150" align="center" />
         <el-table-column prop="projectName" label="项目名称" width="150" align="center" />
+        <el-table-column prop="projectId" label="项目ID" width="100" align="center" />
         <el-table-column prop="lineId" label="线路ID" width="100" align="center" />
+        <el-table-column prop="userName" label="用户名" width="150" align="center" />
         <el-table-column prop="phoneNumber" label="手机号" min-width="140" align="center" />
         <el-table-column prop="code" label="验证码" width="120" align="center">
           <template #default="{ row }">
@@ -100,10 +100,9 @@
             <el-tag type="info" v-else>未知</el-tag>
           </template>
         </el-table-column>
-
-        <el-table-column prop="remark" label="备注信息" min-width="260" show-overflow-tooltip />
         <el-table-column prop="getNumberTime" label="取号时间" width="180" align="center" />
         <el-table-column prop="codeReceivedTime" label="取码时间" width="180" align="center" />
+        <el-table-column prop="remark" label="备注信息" min-width="260" show-overflow-tooltip />
       </el-table>
 
       <!-- 分页 -->

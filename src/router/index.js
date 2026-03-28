@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 // 页面组件
 const LoginPage = () => import('@/pages/LoginPage.vue')
-const Dashboard = () => import('@/pages/Dashboard.vue')
+const DashBoard = () => import('@/pages/Dashboard.vue')
 const SubUsers = () => import('@/pages/SubUsers.vue')
 const ReportPage = () => import('@/pages/ReportPage.vue')
 const UserNumberRecords = () => import('@/pages/UserNumberRecords.vue')

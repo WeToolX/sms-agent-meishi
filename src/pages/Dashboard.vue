@@ -1,8 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div class="dashboard-page">
-    <div class="top-bar">
-      <div class="left-title">代理控制面板</div>
+    <!-- 顶部条 -->
+<div class="top-bar">
+  <div class="left-title">{{ brandName }}代理控制面板</div>
 
       <div class="right-actions">
         <el-button type="primary" size="small" plain @click="handleUser">
@@ -50,12 +51,19 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: 'AgentDashboardPage'
+}
+</script>
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import NoticeBar from '@/components/NoticeBar.vue'
 import { useRouter } from 'vue-router'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { getAgentDashboard } from '@/api/agent'
+import { brandName } from '@/config/brand'
 
 const router = useRouter()
 

@@ -1,11 +1,9 @@
 // src/utils/request.js
 
 import router from '../router'
+import { apiBaseUrl } from '@/config/brand'
 
- const baseURL = 'http://192.168.110.132:8026/'
-//  const baseURL = 'https://api.huikecode.com/';
-// const baseURL = 'https://api.daguicode.com/';
-//const baseURL = 'https://api.meishicode.com';
+const baseURL = apiBaseUrl
 /**
  * 处理 401 跳转逻辑
  */
@@ -85,4 +83,3 @@ export async function request(methodFlag, url, jsonData = {}, isquery = false) {
     return { ok: false, code: -1, message: '网络异常或服务器错误', data: null }
   }
 }
-
