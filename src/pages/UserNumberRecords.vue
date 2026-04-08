@@ -42,7 +42,7 @@
           <el-option label="待取码" :value="0" />
           <el-option label="取码中" :value="1" />
           <el-option label="成功" :value="2" />
-          <el-option label="超时" :value="3" />
+          <el-option label="已退款" :value="3" />
           <el-option label="无效" :value="4" />
         </el-select>
         <!-- 新增：扣费状态筛选 -->
@@ -95,7 +95,7 @@
             <el-tag v-if="row.status === 0">待取码</el-tag>
             <el-tag type="warning" v-else-if="row.status === 1">进行中</el-tag>
             <el-tag type="success" v-else-if="row.status === 2">成功</el-tag>
-            <el-tag type="danger" v-else-if="row.status === 3">超时</el-tag>
+            <el-tag type="danger" v-else-if="row.status === 3">已退款</el-tag>
             <el-tag type="danger" v-else-if="row.status === 4">无效</el-tag>
             <el-tag type="info" v-else>未知</el-tag>
           </template>
